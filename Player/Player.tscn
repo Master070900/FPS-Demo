@@ -1,16 +1,31 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=12 format=2]
 
 [ext_resource path="res://Player/Scripts/Player.gd" type="Script" id=1]
+[ext_resource path="res://Guns/Assault Rifle/AR.tscn" type="PackedScene" id=2]
+[ext_resource path="res://Power Spheres/FireBall.multimesh" type="MultiMesh" id=3]
+[ext_resource path="res://Guns/Pistol/Pistol.tscn" type="PackedScene" id=4]
+[ext_resource path="res://Guns/LMG/LMG.tscn" type="PackedScene" id=5]
+[ext_resource path="res://Guns/Knife/Knife.tscn" type="PackedScene" id=6]
+[ext_resource path="res://Player/Player UI.tscn" type="PackedScene" id=7]
 
 [sub_resource type="CapsuleMesh" id=1]
-radius = 0.5
+radius = 0.3
+mid_height = 1.4
 
 [sub_resource type="SpatialMaterial" id=2]
 
 [sub_resource type="CapsuleShape" id=3]
-radius = 0.5
+radius = 0.3
+height = 1.4
 
-[node name="Player" type="KinematicBody"]
+[sub_resource type="BoxShape" id=4]
+extents = Vector3( 0.8, 0.8, 1.25 )
+
+[node name="Player" type="KinematicBody" groups=[
+"Player",
+]]
+collision_layer = 2
+collision_mask = 3
 script = ExtResource( 1 )
 
 [node name="MeshInstance" type="MeshInstance" parent="."]
@@ -22,10 +37,72 @@ material/0 = SubResource( 2 )
 transform = Transform( 1, 0, 0, 0, -1.62921e-07, 1, 0, -1, -1.62921e-07, 0, 1, 0 )
 shape = SubResource( 3 )
 
-[node name="Head" type="Spatial" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0 )
+[node name="LeanPosition" type="Spatial" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0 )
 
-[node name="Camera" type="Camera" parent="Head"]
+[node name="Head" type="Spatial" parent="LeanPosition"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0 )
+
+[node name="Camera" type="ClippedCamera" parent="LeanPosition/Head"]
 current = true
 fov = 90.0
 far = 500.0
+
+[node name="Cast" type="Spatial" parent="LeanPosition/Head/Camera"]
+
+[node name="ARcast" type="RayCast" parent="LeanPosition/Head/Camera/Cast"]
+enabled = true
+cast_to = Vector3( 0, 0, -50 )
+
+[node name="PistolCast" type="RayCast" parent="LeanPosition/Head/Camera/Cast"]
+enabled = true
+cast_to = Vector3( 0, 0, -25 )
+
+[node name="LMGcast" type="RayCast" parent="LeanPosition/Head/Camera/Cast"]
+enabled = true
+cast_to = Vector3( 0, 0, -35 )
+
+[node name="KnifeCast" type="Area" parent="LeanPosition/Head/Camera/Cast"]
+
+[node name="CollisionShape" type="CollisionShape" parent="LeanPosition/Head/Camera/Cast/KnifeCast"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.6 )
+shape = SubResource( 4 )
+
+[node name="HandPosition" type="Spatial" parent="LeanPosition/Head"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.3, -0.35, 0 )
+
+[node name="Hand" type="Spatial" parent="LeanPosition/Head"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.3, -0.35, 0 )
+
+[node name="AR" parent="LeanPosition/Head/Hand" instance=ExtResource( 2 )]
+visible = false
+
+[node name="Pistol" parent="LeanPosition/Head/Hand" instance=ExtResource( 4 )]
+visible = false
+
+[node name="LMG" parent="LeanPosition/Head/Hand" instance=ExtResource( 5 )]
+visible = false
+
+[node name="Knife" parent="LeanPosition/Head/Hand" instance=ExtResource( 6 )]
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="ColorRect" type="ColorRect" parent="CanvasLayer"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -5.0
+margin_top = -5.0
+margin_right = 5.0
+margin_bottom = 5.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Player UI" parent="CanvasLayer" instance=ExtResource( 7 )]
+
+[node name="MultiMeshInstance" type="MultiMeshInstance" parent="."]
+transform = Transform( 2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 0, 1, 0 )
+visible = false
+multimesh = ExtResource( 3 )
